@@ -25,9 +25,40 @@ func mockServer(path, body string) *httptest.Server {
 	return server
 }
 
+func gossResponse() string {
+	return `{
+  	"results": [{
+      "duration": 48248740,
+      "err": null,
+      "expected": [
+        "true"
+      ],
+      "found": [
+        "true"
+      ],
+      "human": "",
+      "meta": null,
+      "property": "reachable",
+      "resource-id": "tcp://some-server.com:443",
+      "resource-type": "Addr",
+      "result": 0,
+      "successful": true,
+      "summary-line": "Addr: tcp://some-server.com:443: reachable: matches expectation: [true]",
+      "test-type": 0,
+      "title": ""
+    }],
+		"summary": {
+			"failed-count": 0,
+			"summary-line": "Count: 1, Failed: 0, Duration: 0.048s",
+			"test-count": 1,
+			"total-duration": 48441102
+		}
+	}`
+}
+
 func TestGetResults(t *testing.T) {
 	endpoint := "/healthz"
-	respStr := "body"
+	respStr := gossResponse()
 	server := mockServer(endpoint, respStr)
 	defer server.Close()
 
