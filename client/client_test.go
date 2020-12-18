@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -69,17 +68,7 @@ func TestGetResults(t *testing.T) {
 		t.Error("GetResults should not error")
 	}
 
-	if resp.StatusCode != 200 {
-		t.Errorf("GetResults should return a '200' status code; got '%v'", resp.StatusCode)
-	}
-
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Errorf("GetResults should return a readable response body")
-	}
-
-	r := string(bodyBytes)
-	if r != respStr {
-		t.Errorf("GetResults should return '%s'; got '%s'", respStr, r)
+	if resp.Summary.Failed != 0 {
+		t.Errorf("GetResults should return StructuredOuput reporting a Summary.Failed of '0'; got '%v'", resp.Summary.Failed)
 	}
 }
