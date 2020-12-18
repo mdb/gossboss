@@ -55,7 +55,7 @@ func gossResponse() string {
 	}`
 }
 
-func TestGetResults(t *testing.T) {
+func TestGetHealthz(t *testing.T) {
 	endpoint := "/healthz"
 	respStr := gossResponse()
 	server := mockServer(endpoint, respStr)
@@ -63,7 +63,7 @@ func TestGetResults(t *testing.T) {
 
 	c := NewClient()
 
-	resp, err := c.GetResults(server.URL + endpoint)
+	resp, err := c.GetHealthz(server.URL + endpoint)
 	if err != nil {
 		t.Error("GetResults should not error")
 	}

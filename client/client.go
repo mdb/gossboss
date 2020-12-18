@@ -20,8 +20,9 @@ func NewClient() *Client {
 	}
 }
 
-// GetResults returns the goss test results served by a goss server.
-func (c *Client) GetResults(url string) (*outputs.StructuredOutput, error) {
+// GetHealthz returns the goss test results served by a goss server
+// at its /healthz endpoint.
+func (c *Client) GetHealthz(url string) (*outputs.StructuredOutput, error) {
 	return c.doRequest(url)
 }
 
