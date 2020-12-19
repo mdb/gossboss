@@ -23,10 +23,6 @@ func NewClient() *Client {
 // GetHealthz returns the goss test results served by a goss server
 // at its /healthz endpoint.
 func (c *Client) GetHealthz(url string) (*outputs.StructuredOutput, error) {
-	return c.doRequest(url)
-}
-
-func (c *Client) doRequest(url string) (*outputs.StructuredOutput, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
