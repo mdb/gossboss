@@ -100,6 +100,10 @@ func TestCollectHealthz(t *testing.T) {
 		t.Errorf("CollectAllHealthz should return results from '%v' servers; got '%v'", len(servers), len(resps))
 	}
 
+	if resps[0].URL != servers[0] && resps[0].URL != servers[1] && resps[0].URL != servers[2] {
+		t.Error("CollectAllHealthz should return a slice of Healthz, each reporting a URL")
+	}
+
 	if resps[0].Result.Summary.Failed != 0 {
 		t.Errorf("CollectAllHealthz should return a slice of Healthz, each reporting a Result.Summary.Failed of '0'; got '%v'", resps[0].Result.Summary.Failed)
 	}

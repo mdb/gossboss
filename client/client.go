@@ -26,6 +26,9 @@ type Healthz struct {
 	// Result is the /healthz endpoint response body.
 	Result *outputs.StructuredOutput
 
+	// URL is the goss server URL.
+	URL string
+
 	// Error is any error that was encountered when attempting
 	// to fetch the goss test results.
 	Error error
@@ -86,6 +89,7 @@ func (c *Client) collectHealthz(url string, ch chan<- *Healthz) {
 	so, err := c.GetHealthz(url)
 	ch <- &Healthz{
 		Error:  err,
+		URL:    url,
 		Result: so,
 	}
 }
