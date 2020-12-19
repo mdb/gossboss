@@ -13,7 +13,7 @@ type Client struct {
 	HTTPClient *http.Client
 }
 
-// NewClient returns a new Client with the URL it's passed.
+// NewClient returns a new gossboss Client.
 func NewClient() *Client {
 	return &Client{
 		HTTPClient: &http.Client{},
