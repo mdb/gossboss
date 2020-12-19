@@ -24,8 +24,13 @@ func mockServer(path, body string, responseCode int) *httptest.Server {
 	return server
 }
 
-func gossResponse() string {
-	return `{
+func gossResponse(isSuccess bool) string {
+	failedCount := 0
+	if !isSuccess {
+		failedCount = 1
+	}
+
+	return fmt.Sprintf(`{
   	"results": [{
       "duration": 48248740,
       "err": null,
@@ -41,23 +46,23 @@ func gossResponse() string {
       "resource-id": "tcp://some-server.com:443",
       "resource-type": "Addr",
       "result": 0,
-      "successful": true,
+      "successful": %t,
       "summary-line": "Addr: tcp://some-server.com:443: reachable: matches expectation: [true]",
       "test-type": 0,
       "title": ""
     }],
 		"summary": {
-			"failed-count": 0,
+			"failed-count": %v,
 			"summary-line": "Count: 1, Failed: 0, Duration: 0.048s",
 			"test-count": 1,
 			"total-duration": 48441102
 		}
-	}`
+	}`, isSuccess, failedCount)
 }
 
 func TestGetHealthz(t *testing.T) {
 	endpoint := "/healthz"
-	respStr := gossResponse()
+	respStr := gossResponse(true)
 
 	server := mockServer(endpoint, respStr, 200)
 	defer server.Close()
@@ -81,56 +86,68 @@ func TestCollectHealthz(t *testing.T) {
 	}
 
 	tests := []struct {
-		name      string
-		responses []response
+		name        string
+		failedCount int
+		errorCount  int
+		responses   []response
 	}{{
-		name: "all 3 servers respond 200",
+		name:        "all servers respond 200",
+		failedCount: 0,
+		errorCount:  0,
 		responses: []response{{
 			code: 200,
-			body: gossResponse(),
+			body: gossResponse(true),
 		}, {
 			code: 200,
-			body: gossResponse(),
+			body: gossResponse(true),
+		}}}, {
+		name:        "1 server responds 500",
+		failedCount: 1,
+		errorCount:  0,
+		responses: []response{{
+			code: 500,
+			body: gossResponse(false),
 		}, {
 			code: 200,
-			body: gossResponse(),
-		},
-		}}}
+			body: gossResponse(true),
+		}},
+	}}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			endpoint := "/healthz"
 
 			servers := []*httptest.Server{}
+			serverURLs := []string{}
 			for _, r := range test.responses {
 				s := mockServer(endpoint, r.body, r.code)
 				defer s.Close()
+				serverURLs = append(serverURLs, s.URL+endpoint)
 				servers = append(servers, s)
 			}
 
 			c := NewClient()
-
-			serverURLs := []string{}
-			for _, s := range servers {
-				serverURLs = append(serverURLs, s.URL+endpoint)
-			}
-
 			resps := c.CollectAllHealthz(serverURLs)
 
 			if len(resps) != len(serverURLs) {
 				t.Errorf("CollectAllHealthz should return results from '%v' servers; got '%v'", len(serverURLs), len(resps))
 			}
 
-			if resps[0].URL != serverURLs[0] && resps[0].URL != serverURLs[1] && resps[0].URL != serverURLs[2] {
-				t.Error("CollectAllHealthz should return a slice of Healthz, each reporting a URL")
+			failedCount := 0
+			errorCount := 0
+			for _, resp := range resps {
+				failedCount = failedCount + resp.Result.Summary.Failed
+				if resp.Error != nil {
+					errorCount++
+				}
 			}
 
-			if resps[0].Result.Summary.Failed != 0 {
-				t.Errorf("CollectAllHealthz should return a slice of Healthz, each reporting a Result.Summary.Failed of '0'; got '%v'", resps[0].Result.Summary.Failed)
+			if failedCount != test.failedCount {
+				t.Errorf("expected CollectAllHealthz to return '%v' failures; got '%v'", test.failedCount, failedCount)
 			}
 
-			if resps[0].Error != nil {
-				t.Errorf("CollectAllHealthz should return a slice of Healthz, each reporting a nil Error; got '%v'", resps[0].Error)
+			if errorCount != test.errorCount {
+				t.Errorf("expected CollectAllHealthz to return '%v' errors; got '%v'", test.errorCount, errorCount)
 			}
 		})
 	}
