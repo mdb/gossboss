@@ -65,10 +65,46 @@ func TestGetHealthz(t *testing.T) {
 
 	resp, err := c.GetHealthz(server.URL + endpoint)
 	if err != nil {
-		t.Error("GetResults should not error")
+		t.Error("GetHealthz should not error")
 	}
 
 	if resp.Summary.Failed != 0 {
-		t.Errorf("GetResults should return StructuredOuput reporting a Summary.Failed of '0'; got '%v'", resp.Summary.Failed)
+		t.Errorf("GetHealthz should return StructuredOuput reporting a Summary.Failed of '0'; got '%v'", resp.Summary.Failed)
+	}
+}
+
+func TestCollectHealthz(t *testing.T) {
+	endpoint := "/healthz"
+	respStr := gossResponse()
+
+	serverOne := mockServer(endpoint, respStr)
+	defer serverOne.Close()
+
+	serverTwo := mockServer(endpoint, respStr)
+	defer serverTwo.Close()
+
+	serverThree := mockServer(endpoint, respStr)
+	defer serverThree.Close()
+
+	c := NewClient()
+
+	servers := []string{
+		serverOne.URL + endpoint,
+		serverTwo.URL + endpoint,
+		serverThree.URL + endpoint,
+	}
+
+	resps := c.CollectAllHealthz(servers)
+
+	if len(resps) != len(servers) {
+		t.Errorf("CollectAllHealthz should return results from '%v' servers; got '%v'", len(servers), len(resps))
+	}
+
+	if resps[0].Result.Summary.Failed != 0 {
+		t.Errorf("CollectAllHealthz should return a slice of Healthz, each reporting a Result.Summary.Failed of '0'; got '%v'", resps[0].Result.Summary.Failed)
+	}
+
+	if resps[0].Error != nil {
+		t.Errorf("CollectAllHealthz should return a slice of Healthz, each reporting a nil Error; got '%v'", resps[0].Error)
 	}
 }

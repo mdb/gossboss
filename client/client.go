@@ -20,6 +20,41 @@ func NewClient() *Client {
 	}
 }
 
+// Healthz represents goss server test results as served by a
+// goss server's /healthz endpoint.
+type Healthz struct {
+	// Result is the /healthz endpoint response body.
+	Result *outputs.StructuredOutput
+
+	// Error is any error that was encountered when attempting
+	// to fetch the goss test results.
+	Error error
+}
+
+// CollectAllHealthz concurrently retrieves the goss test results from
+// each server URL and returns a slice of the results.
+func (c *Client) CollectAllHealthz(urls []string) []*Healthz {
+	ch := make(chan *Healthz)
+	results := []*Healthz{}
+
+	for _, url := range urls {
+		go c.collectHealthz(url, ch)
+	}
+
+	// wait until all goss server test
+	// results have been collected.
+	for {
+		result := <-ch
+		results = append(results, result)
+
+		if len(results) == len(urls) {
+			break
+		}
+	}
+
+	return results
+}
+
 // GetHealthz returns the goss test results served by a goss server
 // at its /healthz endpoint.
 func (c *Client) GetHealthz(url string) (*outputs.StructuredOutput, error) {
@@ -45,4 +80,12 @@ func (c *Client) GetHealthz(url string) (*outputs.StructuredOutput, error) {
 	}
 
 	return so, nil
+}
+
+func (c *Client) collectHealthz(url string, ch chan<- *Healthz) {
+	so, err := c.GetHealthz(url)
+	ch <- &Healthz{
+		Error:  err,
+		Result: so,
+	}
 }
