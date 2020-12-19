@@ -79,7 +79,7 @@ func TestGetHealthz(t *testing.T) {
 	}
 }
 
-func TestCollectHealthz(t *testing.T) {
+func TestCollectAllHealthz(t *testing.T) {
 	type response struct {
 		code int
 		body string
