@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func mockServer(path, body string) *httptest.Server {
+func mockServer(path, body string, responseCode int) *httptest.Server {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -17,7 +17,7 @@ func mockServer(path, body string) *httptest.Server {
 			return
 		}
 
-		w.WriteHeader(200)
+		w.WriteHeader(responseCode)
 		fmt.Fprintf(w, body)
 	}))
 
@@ -59,7 +59,7 @@ func TestGetHealthz(t *testing.T) {
 	endpoint := "/healthz"
 	respStr := gossResponse()
 
-	server := mockServer(endpoint, respStr)
+	server := mockServer(endpoint, respStr, 200)
 	defer server.Close()
 
 	c := NewClient()
@@ -75,41 +75,63 @@ func TestGetHealthz(t *testing.T) {
 }
 
 func TestCollectHealthz(t *testing.T) {
-	endpoint := "/healthz"
-	respStr := gossResponse()
-
-	serverOne := mockServer(endpoint, respStr)
-	defer serverOne.Close()
-
-	serverTwo := mockServer(endpoint, respStr)
-	defer serverTwo.Close()
-
-	serverThree := mockServer(endpoint, respStr)
-	defer serverThree.Close()
-
-	c := NewClient()
-
-	servers := []string{
-		serverOne.URL + endpoint,
-		serverTwo.URL + endpoint,
-		serverThree.URL + endpoint,
+	type response struct {
+		code int
+		body string
 	}
 
-	resps := c.CollectAllHealthz(servers)
+	tests := []struct {
+		name      string
+		responses []response
+	}{{
+		name: "all 3 servers respond 200",
+		responses: []response{{
+			code: 200,
+			body: gossResponse(),
+		}, {
+			code: 200,
+			body: gossResponse(),
+		}, {
+			code: 200,
+			body: gossResponse(),
+		},
+		}}}
 
-	if len(resps) != len(servers) {
-		t.Errorf("CollectAllHealthz should return results from '%v' servers; got '%v'", len(servers), len(resps))
-	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			endpoint := "/healthz"
 
-	if resps[0].URL != servers[0] && resps[0].URL != servers[1] && resps[0].URL != servers[2] {
-		t.Error("CollectAllHealthz should return a slice of Healthz, each reporting a URL")
-	}
+			servers := []*httptest.Server{}
+			for _, r := range test.responses {
+				s := mockServer(endpoint, r.body, r.code)
+				defer s.Close()
+				servers = append(servers, s)
+			}
 
-	if resps[0].Result.Summary.Failed != 0 {
-		t.Errorf("CollectAllHealthz should return a slice of Healthz, each reporting a Result.Summary.Failed of '0'; got '%v'", resps[0].Result.Summary.Failed)
-	}
+			c := NewClient()
 
-	if resps[0].Error != nil {
-		t.Errorf("CollectAllHealthz should return a slice of Healthz, each reporting a nil Error; got '%v'", resps[0].Error)
+			serverURLs := []string{}
+			for _, s := range servers {
+				serverURLs = append(serverURLs, s.URL+endpoint)
+			}
+
+			resps := c.CollectAllHealthz(serverURLs)
+
+			if len(resps) != len(serverURLs) {
+				t.Errorf("CollectAllHealthz should return results from '%v' servers; got '%v'", len(serverURLs), len(resps))
+			}
+
+			if resps[0].URL != serverURLs[0] && resps[0].URL != serverURLs[1] && resps[0].URL != serverURLs[2] {
+				t.Error("CollectAllHealthz should return a slice of Healthz, each reporting a URL")
+			}
+
+			if resps[0].Result.Summary.Failed != 0 {
+				t.Errorf("CollectAllHealthz should return a slice of Healthz, each reporting a Result.Summary.Failed of '0'; got '%v'", resps[0].Result.Summary.Failed)
+			}
+
+			if resps[0].Error != nil {
+				t.Errorf("CollectAllHealthz should return a slice of Healthz, each reporting a nil Error; got '%v'", resps[0].Error)
+			}
+		})
 	}
 }
