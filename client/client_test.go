@@ -58,6 +58,7 @@ func gossResponse() string {
 func TestGetHealthz(t *testing.T) {
 	endpoint := "/healthz"
 	respStr := gossResponse()
+
 	server := mockServer(endpoint, respStr)
 	defer server.Close()
 

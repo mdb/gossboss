@@ -51,6 +51,7 @@ func (c *Client) CollectAllHealthz(urls []string) []*Healthz {
 		results = append(results, result)
 
 		if len(results) == len(urls) {
+			close(ch)
 			break
 		}
 	}
