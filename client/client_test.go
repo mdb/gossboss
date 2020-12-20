@@ -110,6 +110,16 @@ func TestCollectAllHealthz(t *testing.T) {
 		}, {
 			code: 200,
 			body: gossResponse(true),
+		}}}, {
+		name:        "1 server returns invalid JSON",
+		failedCount: 0,
+		errorCount:  1,
+		responses: []response{{
+			code: 200,
+			body: "foo",
+		}, {
+			code: 200,
+			body: gossResponse(true),
 		}},
 	}}
 
@@ -122,6 +132,7 @@ func TestCollectAllHealthz(t *testing.T) {
 			for _, r := range test.responses {
 				s := mockServer(endpoint, r.body, r.code)
 				defer s.Close()
+
 				serverURLs = append(serverURLs, s.URL+endpoint)
 				servers = append(servers, s)
 			}
@@ -136,7 +147,10 @@ func TestCollectAllHealthz(t *testing.T) {
 			failedCount := 0
 			errorCount := 0
 			for _, resp := range resps {
-				failedCount = failedCount + resp.Result.Summary.Failed
+				if resp.Result != nil {
+					failedCount = failedCount + resp.Result.Summary.Failed
+				}
+
 				if resp.Error != nil {
 					errorCount++
 				}
