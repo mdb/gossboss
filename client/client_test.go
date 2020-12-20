@@ -1,11 +1,17 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
+
+type testResponse struct {
+	code int
+	body string
+}
 
 func mockServer(path, body string, responseCode int) *httptest.Server {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -53,48 +59,77 @@ func gossResponse(isSuccess bool) string {
     }],
 		"summary": {
 			"failed-count": %v,
-			"summary-line": "Count: 1, Failed: 0, Duration: 0.048s",
+			"summary-line": "Count: 1, Failed: %v, Duration: 0.048s",
 			"test-count": 1,
 			"total-duration": 48441102
 		}
-	}`, isSuccess, failedCount)
+	}`, isSuccess, failedCount, failedCount)
 }
 
 func TestGetHealthz(t *testing.T) {
-	endpoint := "/healthz"
-	respStr := gossResponse(true)
-
-	server := mockServer(endpoint, respStr, 200)
-	defer server.Close()
-
-	c := NewClient()
-
-	resp, err := c.GetHealthz(server.URL + endpoint)
-	if err != nil {
-		t.Error("GetHealthz should not error")
+	tests := []struct {
+		name        string
+		expectedErr error
+		failedCount int
+		response    testResponse
+	}{{
+		name:        "the server responds 200 and there are no failures",
+		expectedErr: nil,
+		failedCount: 0,
+		response: testResponse{
+			code: 200,
+			body: gossResponse(true),
+		}}, {
+		name:        "the server responds 500 and there are failures",
+		expectedErr: nil,
+		failedCount: 1,
+		response: testResponse{
+			code: 500,
+			body: gossResponse(false),
+		}}, {
+		name:        "the server responds 200, but serves invalid JSON",
+		expectedErr: errors.New("invalid character 'o' in literal false (expecting 'a')"),
+		failedCount: 0,
+		response: testResponse{
+			code: 200,
+			body: "foo",
+		}},
 	}
 
-	if resp.Summary.Failed != 0 {
-		t.Errorf("GetHealthz should return StructuredOuput reporting a Summary.Failed of '0'; got '%v'", resp.Summary.Failed)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			endpoint := "/healthz"
+			server := mockServer(endpoint, test.response.body, test.response.code)
+			defer server.Close()
+
+			c := NewClient()
+			resp, err := c.GetHealthz(server.URL + endpoint)
+			if err != nil && err.Error() != test.expectedErr.Error() {
+				t.Errorf("expected GetHealthz to return error '%v'; got '%v'", test.expectedErr, err)
+			}
+
+			if err != nil && resp != nil {
+				t.Errorf("expected GetHealthz to return a nil response given a non-nil error of '%v'", err)
+			}
+
+			if resp != nil && resp.Summary.Failed != test.failedCount {
+				t.Errorf("expected GetHealthz to return a Summary.Failed of '%v'; got '%v'", test.failedCount, resp.Summary.Failed)
+			}
+		})
 	}
 }
 
 func TestCollectAllHealthz(t *testing.T) {
-	type response struct {
-		code int
-		body string
-	}
-
 	tests := []struct {
 		name        string
 		failedCount int
 		errorCount  int
-		responses   []response
+		responses   []testResponse
 	}{{
 		name:        "all servers respond 200",
 		failedCount: 0,
 		errorCount:  0,
-		responses: []response{{
+		responses: []testResponse{{
 			code: 200,
 			body: gossResponse(true),
 		}, {
@@ -104,7 +139,7 @@ func TestCollectAllHealthz(t *testing.T) {
 		name:        "1 server responds 500",
 		failedCount: 1,
 		errorCount:  0,
-		responses: []response{{
+		responses: []testResponse{{
 			code: 500,
 			body: gossResponse(false),
 		}, {
@@ -114,7 +149,7 @@ func TestCollectAllHealthz(t *testing.T) {
 		name:        "1 server returns invalid JSON",
 		failedCount: 0,
 		errorCount:  1,
-		responses: []response{{
+		responses: []testResponse{{
 			code: 200,
 			body: "foo",
 		}, {
