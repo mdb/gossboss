@@ -23,12 +23,14 @@ func TestCollect(t *testing.T) {
 	}
 
 	tests := []struct {
+		name     string
 		arg      string
 		outputs  []string
 		err      error
 		response *response
 	}{{
-		arg: "--help",
+		name: "when passed '--help'",
+		arg:  "--help",
 		outputs: []string{
 			description,
 			"Usage:",
@@ -36,7 +38,8 @@ func TestCollect(t *testing.T) {
 		},
 		err: nil,
 	}, {
-		arg: "-h",
+		name: "when passed '-h'",
+		arg:  "-h",
 		outputs: []string{
 			description,
 			"Usage:",
@@ -44,19 +47,22 @@ func TestCollect(t *testing.T) {
 		},
 		err: nil,
 	}, {
-		arg: "",
+		name: "when passed nothing",
+		arg:  "",
 		outputs: []string{
 			"Error: required flag(s) \"servers\" not set",
 		},
 		err: errExit,
 	}, {
-		arg: "--servers",
+		name: "when passed a '--server' with no value",
+		arg:  "--servers",
 		outputs: []string{
 			"Error: flag needs an argument: --servers",
 		},
 		err: errExit,
 	}, {
-		arg: fmt.Sprintf("--servers=%s", replaceText),
+		name: "when passed a '--server' that responds 200 but returns invalid JSON",
+		arg:  fmt.Sprintf("--servers=%s", replaceText),
 		outputs: []string{
 			"Error: invalid character 'o' in literal false (expecting 'a')",
 			"Goss test collection error",
@@ -69,7 +75,7 @@ func TestCollect(t *testing.T) {
 	}}
 
 	for _, test := range tests {
-		t.Run(fmt.Sprintf("when 'collect' is passed '%s'", test.arg), func(t *testing.T) {
+		t.Run(fmt.Sprintf(test.name), func(t *testing.T) {
 			arg := test.arg
 
 			if test.response != nil {
