@@ -79,6 +79,7 @@ func TestCollect(t *testing.T) {
 		arg:  fmt.Sprintf("--servers=%s", placeholderText),
 		outputs: []string{
 			fmt.Sprintf("✘ %s", placeholderText),
+			"Error: Goss test failed",
 		},
 		err: errExit,
 		response: &response{
