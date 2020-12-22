@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestRootCommand(t *testing.T) {
+func TestRoot(t *testing.T) {
 	tests := []struct {
 		arg     string
 		outputs []string
