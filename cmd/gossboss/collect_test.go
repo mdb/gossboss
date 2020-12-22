@@ -62,7 +62,7 @@ func TestCollect(t *testing.T) {
 		},
 		err: errExit,
 	}, {
-		name: "when passed a '--server' that responds 200 but returns invalid JSON",
+		name: "when passed a '--server' server that responds 200 but returns invalid JSON",
 		arg:  fmt.Sprintf("--servers=%s", placeholderText),
 		outputs: []string{
 			fmt.Sprintf("✘ %s", placeholderText),
@@ -73,6 +73,28 @@ func TestCollect(t *testing.T) {
 		response: &response{
 			code: 200,
 			body: "foo",
+		},
+	}, {
+		name: "when passed a '--server' server that has failing tests",
+		arg:  fmt.Sprintf("--servers=%s", placeholderText),
+		outputs: []string{
+			fmt.Sprintf("✘ %s", placeholderText),
+		},
+		err: errExit,
+		response: &response{
+			code: 500,
+			body: fakegoss.ResponseBody(false),
+		},
+	}, {
+		name: "when passed a '--server' server that has no failing tests",
+		arg:  fmt.Sprintf("--servers=%s", placeholderText),
+		outputs: []string{
+			fmt.Sprintf("✔ %s", placeholderText),
+		},
+		err: nil,
+		response: &response{
+			code: 200,
+			body: fakegoss.ResponseBody(true),
 		},
 	}}
 
