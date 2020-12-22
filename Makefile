@@ -17,7 +17,7 @@ test-fmt:
 	test -z $(shell go fmt $(SOURCE))
 
 test: vet test-fmt
-	go test $(SOURCE)
+	go test $(SOURCE) -count=1
 
 build: test
-	go build -o gossboss
+	go build ./cmd/gossboss/

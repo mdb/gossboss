@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/mdb/gossboss/client"
+	"github.com/mdb/gossboss"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ var (
 		Short: "Collect and report goss test results",
 		Long:  "Collect and report goss test results from multiple goss servers' '/healthz' endpoints",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			c := client.NewClient()
+			c := gossboss.NewClient()
 			servers, err := cmd.Flags().GetStringSlice("servers")
 			if err != nil {
 				return err

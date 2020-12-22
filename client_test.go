@@ -1,4 +1,4 @@
-package client
+package gossboss
 
 import (
 	"errors"
