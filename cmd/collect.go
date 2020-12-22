@@ -11,10 +11,9 @@ import (
 var (
 	// collectCmd is the cobra.Command defining the "gossboss collect" action.
 	collectCmd = &cobra.Command{
-		Use:           "collect",
-		Short:         "Collect and report goss test results",
-		Long:          "Collect and report goss test results from multiple goss servers' '/healthz' endpoints",
-		SilenceErrors: true,
+		Use:   "collect",
+		Short: "Collect and report goss test results",
+		Long:  "Collect and report goss test results from multiple goss servers' '/healthz' endpoints",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c := client.NewClient()
 			servers, err := cmd.Flags().GetStringSlice("servers")
@@ -43,6 +42,7 @@ var (
 				fmt.Println(fmt.Sprintf(" \xE2\x9C\x94 %s", resp.URL))
 			}
 
+			// TODO: handle scenarios with both errors and failures
 			if hasErrors {
 				return errors.New("Goss test collection error")
 			}
