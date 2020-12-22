@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/http/httptest"
 	"os/exec"
 	"strings"
 	"testing"
@@ -11,9 +12,9 @@ import (
 )
 
 var (
-	errExit     error  = errors.New("exit status 1")
-	description string = "Collect and report goss test results from multiple goss servers' '/healthz' endpoints"
-	replaceText string = "REPLACE_ME"
+	errExit         error  = errors.New("exit status 1")
+	description     string = "Collect and report goss test results from multiple goss servers' '/healthz' endpoints"
+	placeholderText string = "REPLACE_ME"
 )
 
 func TestCollect(t *testing.T) {
@@ -62,8 +63,9 @@ func TestCollect(t *testing.T) {
 		err: errExit,
 	}, {
 		name: "when passed a '--server' that responds 200 but returns invalid JSON",
-		arg:  fmt.Sprintf("--servers=%s", replaceText),
+		arg:  fmt.Sprintf("--servers=%s", placeholderText),
 		outputs: []string{
+			fmt.Sprintf("✘ %s", placeholderText),
 			"Error: invalid character 'o' in literal false (expecting 'a')",
 			"Goss test collection error",
 		},
@@ -76,11 +78,12 @@ func TestCollect(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(fmt.Sprintf(test.name), func(t *testing.T) {
+			var server *httptest.Server
 			arg := test.arg
 
 			if test.response != nil {
-				server := fakegoss.NewServer("/healthz", test.response.body, test.response.code)
-				arg = strings.ReplaceAll(arg, replaceText, server.URL+"/healthz")
+				server = fakegoss.NewServer("/healthz", test.response.body, test.response.code)
+				arg = strings.ReplaceAll(arg, placeholderText, server.URL+"/healthz")
 				defer server.Close()
 			}
 
@@ -99,6 +102,10 @@ func TestCollect(t *testing.T) {
 			}
 
 			for _, o := range test.outputs {
+				if strings.Contains(o, placeholderText) {
+					o = strings.ReplaceAll(o, placeholderText, server.URL+"/healthz")
+				}
+
 				if !strings.Contains(string(output), o) {
 					t.Errorf("expected '%s' to include output '%s'; got '%s'", test.arg, o, output)
 				}
