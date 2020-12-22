@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 )
 
-// NewServer creates a new fake goss server.
+// NewServer creates a new fake goss server for testing.
 func NewServer(path, body string, responseCode int) *httptest.Server {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -24,7 +24,7 @@ func NewServer(path, body string, responseCode int) *httptest.Server {
 	return server
 }
 
-// ResponseBody returns a new fake goss server JSON response body.
+// ResponseBody returns a new fake goss server JSON response body for testing.
 func ResponseBody(isSuccess bool) string {
 	failedCount := 0
 	if !isSuccess {
