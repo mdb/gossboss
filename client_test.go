@@ -2,68 +2,15 @@ package gossboss
 
 import (
 	"errors"
-	"fmt"
-	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/mdb/gossboss/internal/fakegoss"
 )
 
 type testResponse struct {
 	code int
 	body string
-}
-
-func mockServer(path, body string, responseCode int) *httptest.Server {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
-		if path != r.RequestURI {
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, "not found")
-			return
-		}
-
-		w.WriteHeader(responseCode)
-		fmt.Fprintf(w, body)
-	}))
-
-	return server
-}
-
-func gossResponse(isSuccess bool) string {
-	failedCount := 0
-	if !isSuccess {
-		failedCount = 1
-	}
-
-	return fmt.Sprintf(`{
-  	"results": [{
-      "duration": 48248740,
-      "err": null,
-      "expected": [
-        "true"
-      ],
-      "found": [
-        "true"
-      ],
-      "human": "",
-      "meta": null,
-      "property": "reachable",
-      "resource-id": "tcp://some-server.com:443",
-      "resource-type": "Addr",
-      "result": 0,
-      "successful": %t,
-      "summary-line": "Addr: tcp://some-server.com:443: reachable: matches expectation: [true]",
-      "test-type": 0,
-      "title": ""
-    }],
-		"summary": {
-			"failed-count": %v,
-			"summary-line": "Count: 1, Failed: %v, Duration: 0.048s",
-			"test-count": 1,
-			"total-duration": 48441102
-		}
-	}`, isSuccess, failedCount, failedCount)
 }
 
 func TestGetHealthz(t *testing.T) {
@@ -78,14 +25,14 @@ func TestGetHealthz(t *testing.T) {
 		failedCount: 0,
 		response: testResponse{
 			code: 200,
-			body: gossResponse(true),
+			body: fakegoss.ResponseBody(true),
 		}}, {
 		name:        "the server responds 500 and there are failures",
 		expectedErr: nil,
 		failedCount: 1,
 		response: testResponse{
 			code: 500,
-			body: gossResponse(false),
+			body: fakegoss.ResponseBody(false),
 		}}, {
 		name:        "the server responds 200, but serves invalid JSON",
 		expectedErr: errors.New("invalid character 'o' in literal false (expecting 'a')"),
@@ -99,7 +46,7 @@ func TestGetHealthz(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			endpoint := "/healthz"
-			server := mockServer(endpoint, test.response.body, test.response.code)
+			server := fakegoss.NewServer(endpoint, test.response.body, test.response.code)
 			defer server.Close()
 
 			c := NewClient()
@@ -131,20 +78,20 @@ func TestCollectAllHealthz(t *testing.T) {
 		errorCount:  0,
 		responses: []testResponse{{
 			code: 200,
-			body: gossResponse(true),
+			body: fakegoss.ResponseBody(true),
 		}, {
 			code: 200,
-			body: gossResponse(true),
+			body: fakegoss.ResponseBody(true),
 		}}}, {
 		name:        "1 server responds 500",
 		failedCount: 1,
 		errorCount:  0,
 		responses: []testResponse{{
 			code: 500,
-			body: gossResponse(false),
+			body: fakegoss.ResponseBody(false),
 		}, {
 			code: 200,
-			body: gossResponse(true),
+			body: fakegoss.ResponseBody(true),
 		}}}, {
 		name:        "1 server returns invalid JSON",
 		failedCount: 0,
@@ -154,7 +101,7 @@ func TestCollectAllHealthz(t *testing.T) {
 			body: "foo",
 		}, {
 			code: 200,
-			body: gossResponse(true),
+			body: fakegoss.ResponseBody(true),
 		}},
 	}}
 
@@ -165,7 +112,7 @@ func TestCollectAllHealthz(t *testing.T) {
 			servers := []*httptest.Server{}
 			serverURLs := []string{}
 			for _, r := range test.responses {
-				s := mockServer(endpoint, r.body, r.code)
+				s := fakegoss.NewServer(endpoint, r.body, r.code)
 				defer s.Close()
 
 				serverURLs = append(serverURLs, s.URL+endpoint)
