@@ -21,7 +21,7 @@ var (
 				return err
 			}
 
-			resps := c.CollectAllHealthz(servers)
+			resps := c.CollectHealthzs(servers)
 
 			hasErrors := false
 			hasFailed := false

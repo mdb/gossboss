@@ -66,7 +66,7 @@ func TestGetHealthz(t *testing.T) {
 	}
 }
 
-func TestCollectAllHealthz(t *testing.T) {
+func TestCollectHealthzs(t *testing.T) {
 	tests := []struct {
 		name        string
 		failedCount int
@@ -120,10 +120,10 @@ func TestCollectAllHealthz(t *testing.T) {
 			}
 
 			c := NewClient()
-			resps := c.CollectAllHealthz(serverURLs)
+			resps := c.CollectHealthzs(serverURLs)
 
 			if len(resps) != len(serverURLs) {
-				t.Errorf("CollectAllHealthz should return results from '%v' servers; got '%v'", len(serverURLs), len(resps))
+				t.Errorf("CollectHealthzs should return results from '%v' servers; got '%v'", len(serverURLs), len(resps))
 			}
 
 			failedCount := 0
@@ -139,11 +139,11 @@ func TestCollectAllHealthz(t *testing.T) {
 			}
 
 			if failedCount != test.failedCount {
-				t.Errorf("expected CollectAllHealthz to return '%v' failures; got '%v'", test.failedCount, failedCount)
+				t.Errorf("expected CollectHealthzs to return '%v' failures; got '%v'", test.failedCount, failedCount)
 			}
 
 			if errorCount != test.errorCount {
-				t.Errorf("expected CollectAllHealthz to return '%v' errors; got '%v'", test.errorCount, errorCount)
+				t.Errorf("expected CollectHealthzs to return '%v' errors; got '%v'", test.errorCount, errorCount)
 			}
 		})
 	}

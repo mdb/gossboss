@@ -34,9 +34,9 @@ type Healthz struct {
 	Error error
 }
 
-// CollectAllHealthz concurrently retrieves the goss test results from
+// CollectHealthzs concurrently retrieves the goss test results from
 // each server URL and returns a slice of the results.
-func (c *Client) CollectAllHealthz(urls []string) []*Healthz {
+func (c *Client) CollectHealthzs(urls []string) []*Healthz {
 	ch := make(chan *Healthz)
 	results := []*Healthz{}
 
