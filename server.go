@@ -39,11 +39,12 @@ func (s *Server) HandleHealthzs(w http.ResponseWriter, r *http.Request) {
 
 	hzs := s.Client.CollectHealthzs(s.GossServers)
 
+	responseCode := http.StatusOK
 	if hzs.Summary.Failed != 0 || hzs.Summary.Errored != 0 {
-		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusOK)
+		responseCode = http.StatusInternalServerError
 	}
+
+	w.WriteHeader(responseCode)
 
 	err := json.NewEncoder(w).Encode(hzs)
 	if err != nil {
