@@ -21,11 +21,11 @@ var (
 				return err
 			}
 
-			resps := c.CollectHealthzs(servers)
+			hzs := c.CollectHealthzs(servers)
 
 			hasErrors := false
 			hasFailed := false
-			for _, resp := range resps {
+			for _, resp := range hzs.Healthzs {
 				if resp.Error != nil {
 					hasErrors = true
 					pFailure(resp.URL)
