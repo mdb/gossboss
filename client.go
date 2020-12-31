@@ -20,6 +20,19 @@ func NewClient() *Client {
 	}
 }
 
+// Healthzs represents an aggregate collection of goss server test results
+// across multiple goss servers' /healthz endpoints.
+type Healthzs struct {
+	Healthzs []*Healthz
+	Summary  *Summary
+}
+
+// Summary is a summary of all Healthzs results.
+type Summary struct {
+	Failed  int `json:"failed-count"`
+	Errored int `json:"errored-count"`
+}
+
 // Healthz represents goss server test results as served by a
 // goss server's /healthz endpoint.
 type Healthz struct {
@@ -36,9 +49,14 @@ type Healthz struct {
 
 // CollectHealthzs concurrently retrieves the goss test results from
 // each server URL and returns a slice of the results.
-func (c *Client) CollectHealthzs(urls []string) []*Healthz {
+func (c *Client) CollectHealthzs(urls []string) *Healthzs {
+	hzs := &Healthzs{
+		Summary: &Summary{
+			Failed:  0,
+			Errored: 0,
+		},
+	}
 	ch := make(chan *Healthz)
-	results := []*Healthz{}
 
 	for _, url := range urls {
 		go c.collectHealthz(url, ch)
@@ -47,16 +65,24 @@ func (c *Client) CollectHealthzs(urls []string) []*Healthz {
 	// wait until all goss server test
 	// results have been collected.
 	for {
-		result := <-ch
-		results = append(results, result)
+		hz := <-ch
+		hzs.Healthzs = append(hzs.Healthzs, hz)
 
-		if len(results) == len(urls) {
+		if hz.Error == nil && hz.Result.Summary.Failed != 0 {
+			hzs.Summary.Failed = hzs.Summary.Failed + hz.Result.Summary.Failed
+		}
+
+		if hz.Error != nil {
+			hzs.Summary.Errored++
+		}
+
+		if len(hzs.Healthzs) == len(urls) {
 			close(ch)
 			break
 		}
 	}
 
-	return results
+	return hzs
 }
 
 // GetHealthz returns the goss test results served by a goss server

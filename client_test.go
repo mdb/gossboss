@@ -120,15 +120,23 @@ func TestCollectHealthzs(t *testing.T) {
 			}
 
 			c := NewClient()
-			resps := c.CollectHealthzs(serverURLs)
+			hzs := c.CollectHealthzs(serverURLs)
 
-			if len(resps) != len(serverURLs) {
-				t.Errorf("CollectHealthzs should return results from '%v' servers; got '%v'", len(serverURLs), len(resps))
+			if len(hzs.Healthzs) != len(serverURLs) {
+				t.Errorf("CollectHealthzs should return results from '%v' servers; got '%v'", len(serverURLs), len(hzs.Healthzs))
+			}
+
+			if hzs.Summary.Failed != test.failedCount {
+				t.Errorf("CollectHealthzs should return '%v' failures; got '%v'", test.failedCount, hzs.Summary.Failed)
+			}
+
+			if hzs.Summary.Errored != test.errorCount {
+				t.Errorf("CollectHealthzs should return '%v' errors; got '%v'", test.errorCount, hzs.Summary.Errored)
 			}
 
 			failedCount := 0
 			errorCount := 0
-			for _, resp := range resps {
+			for _, resp := range hzs.Healthzs {
 				if resp.Result != nil {
 					failedCount = failedCount + resp.Result.Summary.Failed
 				}
