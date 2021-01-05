@@ -69,7 +69,7 @@ func (c *Client) CollectHealthzs(urls []string) *Healthzs {
 		hzs.Healthzs = append(hzs.Healthzs, hz)
 
 		if hz.Error == nil && hz.Result.Summary.Failed != 0 {
-			hzs.Summary.Failed = hzs.Summary.Failed + hz.Result.Summary.Failed
+			hzs.Summary.Failed += hz.Result.Summary.Failed
 		}
 
 		if hz.Error != nil {
