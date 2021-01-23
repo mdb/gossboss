@@ -22,7 +22,8 @@ var (
 				return err
 			}
 
-			_ = gossboss.NewServer(":"+port, servers)
+			server := gossboss.NewServer(":"+port, servers)
+			server.Serve()
 
 			return nil
 		},
@@ -32,6 +33,6 @@ var (
 func init() {
 	serveCmd.Flags().StringSliceP("servers", "s", []string{}, "A comma-separated list of goss servers from which to collect test results")
 	serveCmd.MarkFlagRequired("servers")
-	serveCmd.Flags().StringP("port", "p", "8081", "The port on which to run the gossboss server")
+	serveCmd.Flags().StringP("port", "p", "8085", "The port on which to run the gossboss server")
 	rootCmd.AddCommand(serveCmd)
 }
