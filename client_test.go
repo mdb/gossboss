@@ -1,17 +1,13 @@
-package gossboss
+package gossboss_test
 
 import (
 	"errors"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/mdb/gossboss"
 	"github.com/mdb/gossboss/internal/fakegoss"
 )
-
-type testResponse struct {
-	code int
-	body string
-}
 
 func TestGetHealthz(t *testing.T) {
 	tests := []struct {
@@ -49,7 +45,7 @@ func TestGetHealthz(t *testing.T) {
 			server := fakegoss.NewServer(endpoint, test.response.body, test.response.code)
 			defer server.Close()
 
-			c := NewClient()
+			c := gossboss.NewClient()
 			resp, err := c.GetHealthz(server.URL + endpoint)
 			if err != nil && err.Error() != test.expectedErr.Error() {
 				t.Errorf("expected GetHealthz to return error '%v'; got '%v'", test.expectedErr, err)
@@ -119,7 +115,7 @@ func TestCollectHealthzs(t *testing.T) {
 				servers = append(servers, s)
 			}
 
-			c := NewClient()
+			c := gossboss.NewClient()
 			hzs := c.CollectHealthzs(serverURLs)
 
 			if len(hzs.Healthzs) != len(serverURLs) {

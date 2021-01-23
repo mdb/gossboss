@@ -1,10 +1,11 @@
-package gossboss
+package gossboss_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/mdb/gossboss"
 	"github.com/mdb/gossboss/internal/fakegoss"
 )
 
@@ -38,7 +39,7 @@ func TestHandleHealthzs(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			server := NewServer(":8081", []string{gossServer.URL + endpoint})
+			server := gossboss.NewServer(":8081", []string{gossServer.URL + endpoint})
 			handler := http.HandlerFunc(server.HandleHealthzs)
 			rr := httptest.NewRecorder()
 
