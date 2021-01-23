@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	// collectCmd is the cobra.Command defining the "gossboss collect" action.
-	collectCmd = &cobra.Command{
-		Use:   "collect",
+	// healthzsCmd is the cobra.Command defining the "gossboss healthzs" action.
+	healthzsCmd = &cobra.Command{
+		Use:   "healthzs",
 		Short: "Collect and report goss test results",
 		Long:  "Collect and report goss test results from multiple goss servers' '/healthz' endpoints",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -57,9 +57,9 @@ var (
 )
 
 func init() {
-	collectCmd.Flags().StringSliceP("servers", "s", []string{}, "A comma-separated list of goss servers")
-	collectCmd.MarkFlagRequired("servers")
-	rootCmd.AddCommand(collectCmd)
+	healthzsCmd.Flags().StringSliceP("servers", "s", []string{}, "A comma-separated list of goss servers")
+	healthzsCmd.MarkFlagRequired("servers")
+	rootCmd.AddCommand(healthzsCmd)
 }
 
 func pFailure(url string) {

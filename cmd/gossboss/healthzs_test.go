@@ -110,7 +110,7 @@ func TestCollect(t *testing.T) {
 				defer server.Close()
 			}
 
-			output, err := exec.Command("./gossboss", "collect", arg).CombinedOutput()
+			output, err := exec.Command("./gossboss", "healthzs", arg).CombinedOutput()
 
 			if test.err == nil && err != nil {
 				t.Errorf("expected '%s' not to error; got '%v'", arg, err)
