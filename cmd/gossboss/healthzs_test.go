@@ -11,13 +11,13 @@ import (
 	"github.com/mdb/gossboss/internal/fakegoss"
 )
 
-var (
-	errExit         error  = errors.New("exit status 1")
-	description     string = "Collect and report goss test results from multiple goss servers' '/healthz' endpoints"
-	placeholderText string = "REPLACE_ME"
-)
+func TestHealthzs(t *testing.T) {
+	var (
+		errExit         error  = errors.New("exit status 1")
+		description     string = "Collect and report goss test results from multiple goss servers' '/healthz' endpoints"
+		placeholderText string = "REPLACE_ME"
+	)
 
-func TestCollect(t *testing.T) {
 	type response struct {
 		body string
 		code int
@@ -113,15 +113,15 @@ func TestCollect(t *testing.T) {
 			output, err := exec.Command("./gossboss", "healthzs", arg).CombinedOutput()
 
 			if test.err == nil && err != nil {
-				t.Errorf("expected '%s' not to error; got '%v'", arg, err)
+				t.Errorf("expected 'healthzs %s' not to error; got '%v'", arg, err)
 			}
 
 			if test.err != nil && err == nil {
-				t.Errorf("expected '%s' to error with '%s', but it didn't error", arg, test.err.Error())
+				t.Errorf("expected 'healthzs %s' to error with '%s', but it didn't error", arg, test.err.Error())
 			}
 
 			if test.err != nil && err != nil && test.err.Error() != err.Error() {
-				t.Errorf("expected '%s' to error with '%s'; got '%s'", arg, test.err.Error(), err.Error())
+				t.Errorf("expected 'healthzs %s' to error with '%s'; got '%s'", arg, test.err.Error(), err.Error())
 			}
 
 			for _, o := range test.outputs {
@@ -130,7 +130,7 @@ func TestCollect(t *testing.T) {
 				}
 
 				if !strings.Contains(string(output), o) {
-					t.Errorf("expected '%s' to include output '%s'; got '%s'", test.arg, o, output)
+					t.Errorf("expected 'healthzs %s' to include output '%s'; got '%s'", test.arg, o, output)
 				}
 			}
 		})
