@@ -11,13 +11,13 @@ import (
 	"github.com/mdb/gossboss/internal/fakegoss"
 )
 
-var (
-	errExit         error  = errors.New("exit status 1")
-	description     string = "Collect and report goss test results from multiple goss servers' '/healthz' endpoints"
-	placeholderText string = "REPLACE_ME"
-)
+func TestHealthzs(t *testing.T) {
+	var (
+		errExit         error  = errors.New("exit status 1")
+		description     string = "Collect and report goss test results from multiple goss servers' '/healthz' endpoints"
+		placeholderText string = "REPLACE_ME"
+	)
 
-func TestCollect(t *testing.T) {
 	type response struct {
 		body string
 		code int
