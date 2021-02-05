@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+
+	"github.com/mdb/gossboss/internal/fakegoss"
 )
 
 func TestServe(t *testing.T) {
@@ -15,16 +17,18 @@ func TestServe(t *testing.T) {
 		description     string = "Collect and report goss test results from multiple goss servers' '/healthz' endpoints via a web server JSON endpoint"
 		placeholderText string = "REPLACE_ME"
 	)
+
 	type response struct {
 		body string
 		code int
 	}
 
 	tests := []struct {
-		name    string
-		arg     string
-		outputs []string
-		err     error
+		name     string
+		arg      string
+		outputs  []string
+		err      error
+		response *response
 	}{{
 		name: "when passed '--help'",
 		arg:  "--help",
@@ -63,6 +67,12 @@ func TestServe(t *testing.T) {
 		t.Run(fmt.Sprintf(test.name), func(t *testing.T) {
 			var server *httptest.Server
 			arg := test.arg
+
+			if test.response != nil {
+				server = fakegoss.NewServer("/healthz", test.response.body, test.response.code)
+				arg = strings.ReplaceAll(arg, placeholderText, server.URL+"/healthz")
+				defer server.Close()
+			}
 
 			output, err := exec.Command("./gossboss", "serve", arg).CombinedOutput()
 
