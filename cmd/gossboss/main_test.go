@@ -6,6 +6,13 @@ import (
 	"testing"
 )
 
+// response can be used to express a desired fakegoss.NewServer
+// HTTP response body and response code.
+type response struct {
+	body string
+	code int
+}
+
 func TestMain(m *testing.M) {
 	// compile a 'gossboss' for for use in running tests
 	exe := exec.Command("go", "build", "-o", "gossboss")

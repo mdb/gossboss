@@ -18,11 +18,6 @@ func TestHealthzs(t *testing.T) {
 		placeholderText string = "REPLACE_ME"
 	)
 
-	type response struct {
-		body string
-		code int
-	}
-
 	tests := []struct {
 		name     string
 		arg      string
