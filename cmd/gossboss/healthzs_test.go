@@ -18,11 +18,6 @@ func TestHealthzs(t *testing.T) {
 		placeholderText string = "REPLACE_ME"
 	)
 
-	type response struct {
-		body string
-		code int
-	}
-
 	tests := []struct {
 		name     string
 		arg      string
@@ -113,15 +108,15 @@ func TestHealthzs(t *testing.T) {
 			output, err := exec.Command("./gossboss", "healthzs", arg).CombinedOutput()
 
 			if test.err == nil && err != nil {
-				t.Errorf("expected '%s' not to error; got '%v'", arg, err)
+				t.Errorf("expected 'healthzs %s' not to error; got '%v'", arg, err)
 			}
 
 			if test.err != nil && err == nil {
-				t.Errorf("expected '%s' to error with '%s', but it didn't error", arg, test.err.Error())
+				t.Errorf("expected 'healthzs %s' to error with '%s', but it didn't error", arg, test.err.Error())
 			}
 
 			if test.err != nil && err != nil && test.err.Error() != err.Error() {
-				t.Errorf("expected '%s' to error with '%s'; got '%s'", arg, test.err.Error(), err.Error())
+				t.Errorf("expected 'healthzs %s' to error with '%s'; got '%s'", arg, test.err.Error(), err.Error())
 			}
 
 			for _, o := range test.outputs {
@@ -130,7 +125,7 @@ func TestHealthzs(t *testing.T) {
 				}
 
 				if !strings.Contains(string(output), o) {
-					t.Errorf("expected '%s' to include output '%s'; got '%s'", test.arg, o, output)
+					t.Errorf("expected 'healthzs %s' to include output '%s'; got '%s'", test.arg, o, output)
 				}
 			}
 		})

@@ -10,10 +10,11 @@ import (
 
 // Client is an HTTP client for interacting with goss servers.
 type Client struct {
+	// HTTPClient is a *http.Client.
 	HTTPClient *http.Client
 }
 
-// NewClient returns a new gossboss Client.
+// NewClient returns a new gossboss goss server Client.
 func NewClient() *Client {
 	return &Client{
 		HTTPClient: &http.Client{},
