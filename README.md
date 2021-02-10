@@ -8,13 +8,17 @@ Collect aggregated [goss](https://goss.rocks/) test results from multiple remote
 
 ### CLI
 
+Collect and view `goss` test results from multiple `goss` servers:
+
 ```
 gossboss healthzs \
   --server "http://foo.com/healthz" \
   --server "http://bar.com/healthz"
 ```
 
-### Server - TODO
+### Server
+
+Start a server whose `/healthzs` endpoint returns aggregated `goss` test results from multiple `goss` servers:
 
 ```
 gossboss serve \
