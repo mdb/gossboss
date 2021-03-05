@@ -23,7 +23,7 @@ test: vet test-fmt
 
 goreleaser:
 	if ! which goreleaser &> /dev/null; then \
-		go get -u github.com/goreleaser/goreleaser; \
+		go get github.com/goreleaser/goreleaser; \
 	fi
 
 build: goreleaser
