@@ -3,7 +3,9 @@ SOURCE=./...
 .PHONY: vet \
 	fmt \
 	test-fmt \
-	test
+	test \
+	goreleaser \
+	clean
 
 .DEFAULT_GOAL := build
 
@@ -19,7 +21,12 @@ test-fmt:
 test: vet test-fmt
 	go test -cover $(SOURCE) -count=1
 
-build:
+goreleaser:
+	if ! which goreleaser &> /dev/null; then \
+		go get -u github.com/goreleaser/goreleaser; \
+	fi
+
+build: goreleaser
 	goreleaser release \
 		--snapshot \
 		--skip-publish \
