@@ -21,12 +21,10 @@ test-fmt:
 test: vet test-fmt
 	go test -cover $(SOURCE) -count=1
 
-goreleaser:
-	if ! which goreleaser &> /dev/null; then \
-		go get github.com/goreleaser/goreleaser; \
-	fi
+tools:
+	go install
 
-build: goreleaser
+build: tools
 	goreleaser release \
 		--snapshot \
 		--skip-publish \
