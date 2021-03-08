@@ -1,6 +1,6 @@
 // +build tools
 
-package gossboss
+package tools
 
 import (
 	_ "github.com/goreleaser/goreleaser"
