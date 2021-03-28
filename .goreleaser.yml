@@ -1,3 +1,4 @@
+project_name: gossboss
 before:
   hooks:
     - go mod download
@@ -22,7 +23,12 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: "{{ .Version }}-next"
+dockers:
+  - goos: linux
+    image_templates:
+    - "clapclapexcitement/gossboss:latest"
+    - "clapclapexcitement/gossboss:{{.Version}}"
 changelog:
   sort: asc
   filters:

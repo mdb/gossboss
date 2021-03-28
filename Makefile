@@ -1,10 +1,13 @@
 SOURCE=./...
+VERSION="0.0.0"
 
 .PHONY: vet \
 	fmt \
 	test-fmt \
 	test \
 	goreleaser \
+	build \
+	tag \
 	clean
 
 .DEFAULT_GOAL := build
@@ -31,6 +34,19 @@ build: goreleaser
 		--snapshot \
 		--skip-publish \
 		--rm-dist
+
+release: goreleaser tag
+	goreleaser release \
+		--rm-dist
+
+tag:
+	if git rev-parse $(VERSION) >/dev/null 2>&1; then \
+		echo "found existing $(VERSION) git tag"; \
+	else \
+		echo "creating git tag $(VERSION)"; \
+		git tag $(VERSION); \
+		git push origin $(VERSION); \
+	fi
 
 clean:
 	rm -rf dist || exit 0
