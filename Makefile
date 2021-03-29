@@ -34,13 +34,14 @@ build: tools
 		--skip-publish \
 		--rm-dist
 
-release: tools tag
+release: tools
 	goreleaser release \
 		--rm-dist
 
 tag:
 	if git rev-parse $(VERSION) >/dev/null 2>&1; then \
 		echo "found existing $(VERSION) git tag"; \
+		exit 1; \
 	else \
 		echo "creating git tag $(VERSION)"; \
 		git tag $(VERSION); \
