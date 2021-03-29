@@ -1,3 +1,5 @@
+[![CI](https://github.com/mdb/gossboss/actions/workflows/ci.yml/badge.svg)](https://github.com/mdb/gossboss/actions/workflows/ci.yml)
+
 # gossboss
 
 Collect and view aggregated [goss](https://goss.rocks/) test results from
