@@ -24,18 +24,17 @@ test-fmt:
 test: vet test-fmt
 	go test -cover $(SOURCE) -count=1
 
-goreleaser:
-	if ! which goreleaser &> /dev/null; then \
-		go get github.com/goreleaser/goreleaser; \
-	fi
+tools:
+	echo "Installing tools from tools.go"
+	cat tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go install %
 
-build: goreleaser
+build: tools
 	goreleaser release \
 		--snapshot \
 		--skip-publish \
 		--rm-dist
 
-release: goreleaser tag
+release: tools tag
 	goreleaser release \
 		--rm-dist
 
