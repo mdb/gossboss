@@ -8,6 +8,7 @@ VERSION="0.0.0"
 	goreleaser \
 	build \
 	tag \
+	delete-tag \
 	clean
 
 .DEFAULT_GOAL := build
@@ -47,6 +48,10 @@ tag:
 		git tag $(VERSION); \
 		git push origin $(VERSION); \
 	fi
+
+delete-tag:
+	git tag -d $(VERSION)
+	git push --delete origin $(VERSION)
 
 clean:
 	rm -rf dist || exit 0
