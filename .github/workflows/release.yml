@@ -17,6 +17,11 @@ jobs:
         with:
           go-version: 1.16
 
+      - name: Login to Docker registry
+        run: |
+          echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | \
+          docker login docker.io --username clapclapexcitement --password-stdin
+
       - name: Build & Release
         run: make release
         env:
