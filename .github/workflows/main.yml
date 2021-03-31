@@ -1,53 +1,46 @@
-name: Release
+name: CI/CD
 
-on:
-  push:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
-  build:
+  build-snapshot:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
         go-version: 1.16
-
     - name: Build
       run: make
 
-  tag:
+  create-release-tag:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: tag
-        run: make tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  release:
-    runs-on: ubuntu-latest
-    needs: tag
+    needs: build-snapshot
     environment:
       name: release
     steps:
       - uses: actions/checkout@v2
+      - name: Create release tag
+        run: make tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  build-and-publish-release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: create-release-tag
+    steps:
+      - uses: actions/checkout@v2
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
-
       - name: Login to Docker registry
         run: |
           echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | \
           docker login docker.io --username clapclapexcitement --password-stdin
-
       - name: Build & Release
         run: make release
         env:

@@ -1,4 +1,4 @@
-[![CI](https://github.com/mdb/gossboss/actions/workflows/ci.yml/badge.svg)](https://github.com/mdb/gossboss/actions/workflows/ci.yml)
+[![CI/CD](https://github.com/mdb/gossboss/actions/workflows/main.yml/badge.svg)](https://github.com/mdb/gossboss/actions/workflows/main.yml)
 
 # gossboss
 
