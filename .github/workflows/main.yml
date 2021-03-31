@@ -14,7 +14,7 @@ jobs:
     - name: Build
       run: make
 
-  create-release-tag:
+  build-and-publish-release:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: build-snapshot
@@ -22,21 +22,14 @@ jobs:
       name: release
     steps:
       - uses: actions/checkout@v2
-      - name: Create release tag
-        run: make tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-and-publish-release:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    needs: create-release-tag
-    steps:
-      - uses: actions/checkout@v2
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
+      - name: Create release tag
+        run: make tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to Docker registry
         run: |
           echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | \
