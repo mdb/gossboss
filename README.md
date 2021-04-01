@@ -129,12 +129,24 @@ make
 
 ## Releasing
 
-`make tag` publishes a new git tag corresponding to the `Makefile`'s `VERSION`
-variable. In turn, [GitHub Actions](https://github.com/mdb/gossboss/actions)
-builds and publishes a new, corresponding
-[release](http://github.com/mdb/gossboss/releases) and [Docker
-image](https://hub.docker.com/r/clapclapexcitement/gossboss) using
-[goreleaser](https://goreleaser.com/).
+[GitHub Actions](https://github.com/mdb/gossboss/actions) builds and publishes
+[approved](https://docs.github.com/en/actions/managing-workflow-runs/reviewing-deployments)
+[releases](http://github.com/mdb/gossboss/releases) using
+[goreleaser](https://goreleaser.com/) from `gossboss`'s `main` branch.
+
+Alternatively, to manually release...
+
+Create a release tag corresponding to the `Makefile`'s `VERSION` variable's value:
+
+```
+make tag
+```
+
+Build and publish a release:
+
+```
+make release
+```
 
 ## TODO candidates
 
