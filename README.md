@@ -3,7 +3,7 @@
 # gossboss
 
 Collect and view aggregated [goss](https://goss.rocks/) test results from
-multiple remote goss servers.
+multiple remote `goss` servers.
 
 ## Usage
 
