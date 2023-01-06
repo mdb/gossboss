@@ -1,9 +1,10 @@
+---
 project_name: gossboss
 before:
   hooks:
     - go mod download
     - go vet ./...
-    - go test -cover ./... -count=1
+    - go test -cover -race ./... -count=1
     - go generate ./...
 builds:
   - env:
@@ -27,8 +28,8 @@ snapshot:
 dockers:
   - goos: linux
     image_templates:
-    - "clapclapexcitement/gossboss:latest"
-    - "clapclapexcitement/gossboss:{{.Version}}"
+      - "clapclapexcitement/gossboss:latest"
+      - "clapclapexcitement/gossboss:{{.Version}}"
 changelog:
   sort: asc
   filters:
