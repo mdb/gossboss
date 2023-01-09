@@ -40,6 +40,10 @@ release: tools
 		--rm-dist
 .PHONY: release
 
+check-tag:
+	./scripts/ensure_unique_version.sh "$(VERSION)"
+.PHONY: check-tag
+
 tag:
 	if git rev-parse $(VERSION) >/dev/null 2>&1; then \
 		echo "found existing $(VERSION) git tag"; \
