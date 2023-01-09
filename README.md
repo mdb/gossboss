@@ -152,7 +152,5 @@ make release
 
 * service discovery (could `gossboss` be extensible to support the discovery of
 goss server URLs via a cloud provider API?)
-* failure notifications (Slack,
-PagerDuty, SMS, webhook, etc.)
-* configuration file support (could `gossboss` be
-configured via a TOML or YAML file rather than command line flags?)
+* failure notifications (Slack, PagerDuty, SMS, webhook, etc.)
+* configuration file support (could `gossboss` be configured via a TOML or YAML file rather than command line flags?)

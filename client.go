@@ -57,7 +57,7 @@ func (c *Client) CollectHealthzs(urls []string) *Healthzs {
 			Errored: 0,
 		},
 	}
-	ch := make(chan *Healthz)
+	ch := make(chan *Healthz, len(urls))
 
 	for _, url := range urls {
 		go c.collectHealthz(url, ch)
@@ -65,7 +65,7 @@ func (c *Client) CollectHealthzs(urls []string) *Healthzs {
 
 	// wait until all goss server test
 	// results have been collected.
-	for {
+	for len(hzs.Healthzs) < len(urls) {
 		hz := <-ch
 		hzs.Healthzs = append(hzs.Healthzs, hz)
 
@@ -75,11 +75,6 @@ func (c *Client) CollectHealthzs(urls []string) *Healthzs {
 
 		if hz.Error != nil {
 			hzs.Summary.Errored++
-		}
-
-		if len(hzs.Healthzs) == len(urls) {
-			close(ch)
-			break
 		}
 	}
 

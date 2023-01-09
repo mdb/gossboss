@@ -1,6 +1,6 @@
 module github.com/mdb/gossboss
 
-go 1.18
+go 1.19
 
 require (
 	github.com/aelsabbahy/goss v0.3.16
