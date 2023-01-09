@@ -41,7 +41,7 @@ release: tools
 .PHONY: release
 
 check-tag:
-	./scripts/ensure_unique_version.sh "$(VERSION)"
+	./scripts/ensure-unique-version.sh "$(VERSION)"
 .PHONY: check-tag
 
 tag:
