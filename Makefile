@@ -19,6 +19,10 @@ test: vet test-fmt
 	go test -race -cover $(SOURCE) -count=1
 .PHONY: test
 
+benchmark:
+	go test -bench=.
+.PHONY: benchmark
+
 tools:
 	echo "Installing tools from tools.go"
 	cat tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go install %
